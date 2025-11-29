@@ -1,0 +1,119 @@
+@startuml
+skinparam linetype ortho
+skinparam defaultTextAlignment center
+skinparam PackageStyle rect
+skinparam ArrowThickness 1
+
+title PropDevelopment Container diagram
+
+!include ./lib/C4_Container.puml
+
+
+Person(Client, "Клиент")
+Person(Owner, "Собственник")
+Person(Analyst, "Аналитик BI")
+Person(Manager, "Менеджер")
+Person(BusinessAnalyst, "Бизнес-Аналитик")
+Person(Accountant, "Бухгалтер")
+
+System(Firewall1, "Firewall")
+System(Firewall2, "Firewall")
+
+System_Ext(ProviderCommunalServicesResources, "Поставщик ресурсов ЖКХ", "Software System")
+System_Ext(PaymentSystem, "Платежная система", "Провайдер онлайн-платежей")
+System_Ext(StateRegistrationAuthorities, "Государственные регистрационные органы", "Отвечают за регистрационные действия с объектами недвижимости")
+
+System_Boundary(PropDevelopment, "PropDevelopment", "Software System"){
+    Container_Boundary(GroupServicesClients, "Группа сервисов для клиентов"){
+        Container(SalesShowcase, "Витрина продаж", "JavaScript, React",  "Витрина для подбора и бронирования объектов недвижимости")
+        Container(ClientMartEstateApp, "client-mart-estate-app", "Container: Kotlin, SpringBootv", "Приложение для управления информацией об объектах недвижимости")
+        Container(ClientMartApp, "client-mart-app", "Container: Kotlin, SpringBoot", "Приложение для: - предоставления информации об объектах недвижимости, - проведения онлайн-сделок")
+        Container(ClientTourApp, "client-tour-app", "Container: Kotlin, SpringBoot", "Приложение для проведения 3D-тура по объекту недвижимости (онлайн-тур)")
+
+        SystemDb(ClientMartEstateDb, "client-mart-estate-db [PostgreSQL]", "База данных объектов недвижимости")
+        SystemDb(ClientMartDb, "client-mart-db [PostgreSQL]", "База данных для хранения информации об объектах недвижимости и сделкам по ним")
+        SystemDb(ClientTourDb, "client-tour-db    [PostgreSQL]", "База данных проведения онлайн-тура")
+
+        Container(ClientCrmApp,client-crm-app", "e.g. SpringBoot, ElasticSearch,Container: Dynamics CRM", "Система управления клиентскими данными")
+        SystemDb(CrmDb, "crm-db                                [MSSQL]", "База данных системы CRM")
+    }
+
+    Container_Boundary(CommunalServicesGroup, "Группа сервисов ЖКУ"){
+        Container(ShowcaseServicesOwners, "Витрина сервисов для собственников", "Mobile app(iOS, Android)",  "Мобильные приложения для собственников")
+
+        Container(TenantCoreApp, "tenant-core-app", "Container: Kotlin, SpringBoot", "Приложение для предоставления услуг собственникам")
+        SystemDb(TenantCoreDb, "tenant-core-db                                [PostgreSQL]", "База данных услуг ЖКХ по собственникам")
+
+        Container(CRM, "CRM", "Container: Kotlin, Spring Boot", "Система управления данными собственников")
+        SystemDb(CrmTenantDb, "crm-tenant-db                                [PostgreSQL]", "База данных CRM по собственникам")
+    }
+
+    Container(AuthService1, "auth-service-1", "Keycloak", "Сервис аутентификации покупателей")
+    SystemDb(AuthDb1, "auth-db-1         [PostgreSQL]", "База данных сервиса аутентификации покупателей")
+
+    Container(ActiveDirectory, "Active Directory", "MS Active directory", "Служба каталогов, которая обслуживает финансовые сервисы")
+
+    Container(DataStorage, "Хранилище данных", "Greenplum", "Единое хранилище данных для всех систем компании")
+    SystemDb(DataStorageS3, "DWH Хранилище        [S3]", "Физическое хранилище данных DWH")
+
+
+    Container_Boundary(AccountantContainer, ""){
+        Container(AccountantService1, "accountant-service-1", "Keycloak", "Система бухгалтерского учёта")
+    }
+}
+
+Rel(Client, Firewall1,)
+Rel(Firewall1, SalesShowcase,)
+
+Rel(SalesShowcase, ClientMartEstateApp, "Получить данные по объектам недвижимости [REST]")
+Rel(ClientMartEstateApp, ClientMartEstateDb, "JDBC")
+Rel(ClientMartEstateDb, DataStorage, "Передача сырых данных [CDC]")
+
+Rel(SalesShowcase, ClientCrmApp, "Регистрация клиента Карточка клиента Профиль клиента [REST]")
+Rel(ClientCrmApp, CrmDb, "JDBC")
+Rel(ClientCrmApp, ActiveDirectory, "Аутентификация менеджеров")
+Rel(ClientCrmApp, ClientTourApp, "Публикация каталога объектов [Kafka]")
+Rel(ClientCrmApp, ClientMartApp, "Публикация каталога объектов [Kafka]")
+Rel(CrmDb, DataStorage, "Передача сырых данных [CDC]")
+
+Rel(SalesShowcase, ClientMartApp, "[REST]")
+Rel(ClientMartApp, StateRegistrationAuthorities, "СМЭВ [SOAP]")
+Rel(ClientMartApp, ClientMartDb, "JDBC")
+Rel(ClientMartDb, DataStorage, "Передача сырых данных [CDC]")
+
+Rel(SalesShowcase, ClientTourApp, )
+Rel(ClientTourApp, ClientTourDb, )
+
+Rel(SalesShowcase, AuthService1, "Регистрация Аутентификация [REST]")
+Rel(AuthService1, AuthDb1, )
+
+Rel(Owner, Firewall2,)
+Rel(Firewall2, ShowcaseServicesOwners,)
+
+Rel(ShowcaseServicesOwners, AuthService1, "Регистрация Аутентификация [REST]")
+
+Rel(ShowcaseServicesOwners, TenantCoreApp, "[REST, WS]")
+Rel(TenantCoreApp, TenantCoreDb, "[JDBC]")
+Rel(TenantCoreApp, ProviderCommunalServicesResources, )
+Rel(TenantCoreApp, PaymentSystem, )
+Rel(TenantCoreApp, ActiveDirectory, "Аутентификация менеджеров" )
+Rel(TenantCoreApp, CRM, "Получение клиентских данных [REST]" )
+Rel(TenantCoreDb, DataStorage, "Передача сырых данных [CDC]")
+
+Rel(ShowcaseServicesOwners, CRM, "[REST]")
+Rel(CRM, CrmTenantDb, "[JDBC]" )
+Rel(CrmTenantDb, DataStorage, "Передача сырых данных [CDC]")
+
+Rel(DataStorage, ActiveDirectory ,  "Аутентификация бизнес-аналитика")
+Rel(DataStorage, DataStorageS3, )
+
+Rel(Accountant, AccountantService1,)
+Rel(AccountantService1, AuthDb1,)
+Rel(AccountantService1, ActiveDirectory, "Аутентификация")
+
+Rel(Analyst, DataStorage,)
+
+Rel(BusinessAnalyst, PropDevelopment,)
+Rel(Manager, PropDevelopment,)
+
+@enduml
