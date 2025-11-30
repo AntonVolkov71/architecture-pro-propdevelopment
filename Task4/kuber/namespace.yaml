@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: propdevelopment
+  labels:
+    name: propdevelopment
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: smarthome
+  labels:
+    name: smarthome

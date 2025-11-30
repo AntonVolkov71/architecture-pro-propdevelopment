@@ -1,0 +1,33 @@
+# cluster-security
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-security
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+---
+# cluster-watcher
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-watcher
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "endpoints", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+---
+# smarthome-namespace-admin
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: smarthome-namespace-admin
+  namespace: smarthome
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]

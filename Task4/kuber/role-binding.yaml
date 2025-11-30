@@ -1,0 +1,56 @@
+# devops-sa
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: devops-admin-binding
+subjects:
+  - kind: ServiceAccount
+    name: devops-sa
+    namespace: propdevelopment
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+# security-sa
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: security-binding
+subjects:
+  - kind: ServiceAccount
+    name: security-sa
+    namespace: propdevelopment
+roleRef:
+  kind: ClusterRole
+  name: cluster-security
+  apiGroup: rbac.authorization.k8s.io
+---
+# watcher-sa
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: watcher-binding
+subjects:
+  - kind: ServiceAccount
+    name: watcher-sa
+    namespace: propdevelopment
+roleRef:
+  kind: ClusterRole
+  name: cluster-watcher
+  apiGroup: rbac.authorization.k8s.io
+---
+# smarthome-operator-sa
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: smarthome-operator-binding
+  namespace: smarthome
+subjects:
+  - kind: ServiceAccount
+    name: smarthome-operator-sa
+    namespace: smarthome
+roleRef:
+  kind: Role
+  name: smarthome-namespace-admin
+  apiGroup: rbac.authorization.k8s.io
