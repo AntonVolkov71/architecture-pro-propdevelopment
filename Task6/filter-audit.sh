@@ -20,6 +20,5 @@ jq -R '
 
 jq -s '.' audit-extract.json > audit-extract-array.json
 
-echo "Готово:"
-echo " - audit-extract.json        (по одному объекту на строку)"
-echo " - audit-extract-array.json  (массив подозрительных событий)"
+echo "Готово"
+
