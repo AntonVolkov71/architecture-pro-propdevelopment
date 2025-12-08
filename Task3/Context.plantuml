@@ -1,0 +1,48 @@
+@startuml
+skinparam linetype ortho
+
+title PropDevelopment Container diagram
+
+!include ./lib/C4_Container.puml
+
+Person(Client, "Клиент")
+Person(Owner, "Собственник")
+Person(Accountant, "Бухгалтер")
+Person(Staff, "Сотрудники")
+
+System(Firewall1, "Firewall")
+System(Firewall2, "Firewall")
+System(Firewall3, "Firewall")
+
+System_Ext(ProviderCommunalServicesResources, "Поставщик ресурсов ЖКХ", "Software System")
+System_Ext(PaymentSystem, "Платежная система", "Провайдер онлайн-платежей")
+System_Ext(StateRegistrationAuthorities, "Государственные регистрационные органы", "Отвечают за регистрационные действия с объектами недвижимости")
+System_Ext(SmartHome, "Умный дом")
+
+Container_Ext(IntelligentSystem, "Интеллектуальные системы")
+
+System_Boundary(PropDevelopment, "PropDevelopment", "Software System"){
+    Container(GroupServicesClients, "Группа сервисов для клиентов")
+
+    Container(CommunalServicesGroup, "Группа сервисов ЖКУ")
+
+    Container(AccountantService1, "accountant-service-1", "Keycloak", "Система бухгалтерского учёта")
+}
+
+Rel(Client, Firewall1,)
+Rel(Firewall1, GroupServicesClients,)
+Rel(GroupServicesClients, StateRegistrationAuthorities, "СМЭВ [SOAP]")
+
+Rel(Owner, Firewall2,)
+Rel(Firewall2, CommunalServicesGroup,)
+Rel(CommunalServicesGroup, IntelligentSystem, )
+Rel(CommunalServicesGroup, ProviderCommunalServicesResources, )
+Rel(CommunalServicesGroup, Firewall3, )
+Rel(CommunalServicesGroup, PaymentSystem, )
+Rel(Firewall3, SmartHome, )
+
+Rel(Accountant, AccountantService1,)
+Rel(Staff, PropDevelopment,)
+
+LAYOUT_TOP_DOWN()
+@enduml
